@@ -7,7 +7,10 @@ script = "script"
 solc_version = "0.8.28"
 evm_version = "cancun"
 optimizer = true
-optimizer_runs = 1_000_000
+# The factory embeds the pool's full creation code, so its runtime size is pool-initcode plus
+# factory logic. At 1e6 runs that lands ~1KB over EIP-170 and cannot be deployed. 800 leaves ~4KB
+# of headroom and costs under 2% on a swap — the same trade-off Uniswap V3 settled on.
+optimizer_runs = 800
 bytecode_hash = "none"
 cbor_metadata = false
 ffi = false

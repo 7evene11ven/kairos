@@ -169,13 +169,18 @@ alone: no fixed point to solve, one logarithm per swap, and donations that canno
 
 | Operation | Gas |
 |---|---|
-| `swap` — first of a block, active pool | **34,208** |
-| `swap` — same block, warm | **29,092** |
-| `swap` — cold pool, first trade after a long idle | 204,063 |
-| `mint` / `burn` / `collect` | 250,136 / 47,894 / 11,184 |
+| `swap` — first of a block, active pool | **34,857** |
+| `swap` — same block, warm | **29,630** |
+| `swap` — cold pool, first trade after a long idle | 204,811 |
+| `mint` / `burn` / `collect` | 250,773 / 48,439 / 11,515 |
 
 A steady-state swap is cheaper than Uniswap V2's, despite computing a logarithm, because the
 invariant is preserved exactly and the whole hot path fits in three storage slots.
+
+The binding constraint is bytecode size, not gas: the factory embeds the pool's entire creation code,
+so at `optimizer_runs = 1_000_000` it lands ~1 KB over EIP-170 and cannot be deployed at all. The
+project ships at `800` — ~4 KB of headroom for under 2% on a swap. `forge build --sizes` gates this
+in CI.
 
 ---
 

@@ -104,12 +104,12 @@ so a regression fails CI rather than shipping.
 
 | Operation | Gas |
 |---|---|
-| `swap` — first of a block, active pool | **34,208** |
-| `swap` — same block, everything warm | **29,092** |
-| `swap` — cold pool, first trade after a long idle | 204,063 |
-| `mint` | 250,136 |
-| `burn` | 47,894 |
-| `collect` | 11,184 |
+| `swap` — first of a block, active pool | **34,857** |
+| `swap` — same block, everything warm | **29,630** |
+| `swap` — cold pool, first trade after a long idle | 204,811 |
+| `mint` | 250,773 |
+| `burn` | 48,439 |
+| `collect` | 11,515 |
 
 The steady-state swap is cheaper than a Uniswap V2 swap, despite computing a logarithm, because
 `x·y = k` is preserved exactly and every slot on the path is already warm. The cold-pool figure is
@@ -121,3 +121,20 @@ be a trader.
 `lnRatio` — a 59-iteration squaring loop for full WAD precision — costs a few thousand gas and runs
 once per swap. A cheaper series over the near-unity range that real swaps occupy would trim it, at
 the cost of a second code path to reason about. It has been left as one exact implementation.
+
+## Bytecode size
+
+| Contract | Runtime | Margin under EIP-170 |
+|---|---:|---:|
+| `KairosFactory` | 20,464 B | 4,112 B |
+| `KairosPool` | 17,101 B | 7,475 B |
+| `KairosLens` | 4,398 B | 20,178 B |
+| `KairosRouter` | 3,363 B | 21,213 B |
+
+The factory is the binding constraint, because `new KairosPool{salt: ...}()` embeds the pool's entire
+creation code in it: factory runtime size is pool initcode plus factory logic. At `optimizer_runs =
+1_000_000` that lands about 1 KB *over* the limit and simply cannot be deployed. The project ships at
+`800`, which leaves ~4 KB of headroom and costs under 2% on a swap.
+
+`forge build --sizes` exits non-zero on an oversized contract and runs in CI, so this cannot regress
+silently.
