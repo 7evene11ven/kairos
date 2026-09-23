@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FOUNDRY_PROFILE: default
+
+jobs:
+  contracts:
+    name: build · lint · test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check formatting
+        run: forge fmt --check
+
+      - name: Lint production code
+        run: forge lint src/
+
+      - name: Build
+        run: forge build --sizes
+
+      - name: Test
+        run: forge test -vv
+
+      - name: Gas benchmark
+        run: forge test --match-path 'test/Gas.t.sol' -vv
+
+  deep:
+    name: deep fuzz · invariants
+    runs-on: ubuntu-latest
+    # The slow gate: 20k fuzz runs and 512 invariant runs of depth 256.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Deep test run
+        run: FOUNDRY_PROFILE=deep forge test
+
+  simulation:
+    name: research simulation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install numpy matplotlib
+
+      - name: Verify the math fixtures are in sync with their generator
+        run: |
+          python3 sim/gen_math_fixtures.py > /tmp/MathFixtures.sol
+          diff -u test/fixtures/MathFixtures.sol /tmp/MathFixtures.sol \
+            || (echo "::error::MathFixtures.sol is stale; run 'make fixtures'" && exit 1)
+
+      - name: Smoke-run the simulation
+        run: python3 sim/kairos_sim.py --blocks 3000 --no-plots
