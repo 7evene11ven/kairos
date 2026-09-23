@@ -173,7 +173,8 @@ library MaturityCalendar {
                 uint256 endBucket = lastCrossed + WINDOW;
                 if (toBucket < endBucket) endBucket = toBucket;
 
-                uint32 epoch;
+                // 0 doubles as "no snapshot minted for this sync yet"; explicit for clarity.
+                uint32 epoch = 0;
                 for (uint256 b = lastCrossed + 1; b <= endBucket; ++b) {
                     uint64 mask = _bit(b);
                     if (bitmap & mask == 0) continue;

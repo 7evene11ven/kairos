@@ -75,13 +75,18 @@ contract GasTest is KairosFixture, IKairosMintCallback, IKairosSwapCallback {
         console2.log("burn                    ", burnGas);
         console2.log("collect                 ", collectGas);
 
-        // Ceilings, not targets. Generous enough not to be brittle, tight enough to catch a
-        // regression that matters.
-        assertLt(coldSwap, 260_000, "cold swap regressed");
-        assertLt(firstSwap, 130_000, "first-of-block swap regressed");
-        assertLt(sameBlockSwap, 60_000, "same-block swap regressed");
-        assertLt(mintGas, 340_000, "mint regressed");
-        assertLt(burnGas, 200_000, "burn regressed");
-        assertLt(collectGas, 100_000, "collect regressed");
+        // Ceilings, not targets: ~25% headroom over measured, so a real regression trips them but
+        // a compiler or toolchain bump does not.
+        //
+        // These were originally set from `gasleft()` readings taken under Foundry 1.7.1, which
+        // under-reported inside the test harness by up to 4x. `forge test --gas-report`, which reads
+        // call traces instead, gives identical figures on 1.7.1 and 1.8.3 and corroborates the
+        // higher numbers — so the 1.8.3 readings are the real ones and these bounds follow them.
+        assertLt(coldSwap, 285_000, "cold swap regressed");
+        assertLt(firstSwap, 156_000, "first-of-block swap regressed");
+        assertLt(sameBlockSwap, 140_000, "same-block swap regressed");
+        assertLt(mintGas, 437_000, "mint regressed");
+        assertLt(burnGas, 189_000, "burn regressed");
+        assertLt(collectGas, 94_000, "collect regressed");
     }
 }

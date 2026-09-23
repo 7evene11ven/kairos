@@ -104,19 +104,27 @@ so a regression fails CI rather than shipping.
 
 | Operation | Gas |
 |---|---|
-| `swap` — first of a block, active pool | **34,857** |
-| `swap` — same block, everything warm | **29,630** |
-| `swap` — cold pool, first trade after a long idle | 204,811 |
-| `mint` | 250,773 |
-| `burn` | 48,439 |
-| `collect` | 11,515 |
+| `swap` — same block, everything warm | **112,162** |
+| `swap` — first of a block, active pool | **124,189** |
+| `swap` — cold pool, first trade after a long idle | 227,143 |
+| `mint` | 349,489 |
+| `burn` | 151,235 |
+| `collect` | 74,987 |
 
-The steady-state swap is cheaper than a Uniswap V2 swap, despite computing a logarithm, because
-`x·y = k` is preserved exactly and every slot on the path is already warm. The cold-pool figure is
+Cross-checked against `forge test --gas-report`, which reads call traces rather than `gasleft()` and
+returns the same figures (swap min 111,478 · mint 348,802 · burn 150,696).
+
+A warm swap lands in the same range as a Uniswap V2 swap (~100–110k) while also updating a realised
+volatility estimate and a time-weighted fee ledger, neither of which V2 has. The cold-pool figure is
 the honest worst case: every storage slot is cold, the epoch rolls, the oracle folds in an
 observation, and the maturity calendar crosses the buckets that matured while nobody was looking. The
 first caller after a long silence pays for all of it; `poke()` exists so that caller does not have to
 be a trader.
+
+**Measurement basis.** These come from Foundry 1.8.3. Foundry 1.7.1 under-reported `gasleft()` inside
+the test harness by as much as 4x — it put a warm swap at 29,630 — and an earlier revision of this
+document repeated those numbers. `--gas-report` agreeing across both versions is what settled which
+set was real. The CI workflow pins its toolchain version for exactly this reason.
 
 `lnRatio` — a 59-iteration squaring loop for full WAD precision — costs a few thousand gas and runs
 once per swap. A cheaper series over the near-unity range that real swaps occupy would trim it, at

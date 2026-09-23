@@ -80,7 +80,8 @@ library MathLib {
     function log2Wad(uint256 x) internal pure returns (int256) {
         if (x == 0) revert LogUndefined();
 
-        bool negate;
+        // Explicit for the reader and for the linter; Solidity zero-initialises either way.
+        bool negate = false;
         if (x < WAD) {
             negate = true;
             x = FullMath.mulDiv(WAD, WAD, x);

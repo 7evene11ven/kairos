@@ -48,8 +48,10 @@ library Volatility {
         uint256 dt = MathLib.clamp(interval, MIN_SAMPLE_INTERVAL, MAX_SAMPLE_INTERVAL);
 
         unchecked {
-            // sample = m^2 / dt, in WAD. m <= 0.5e18 so m*m <= 2.5e35 — no overflow.
-            uint256 sample = ((m * m) / WAD) / dt;
+            // sample = m^2 / dt, in WAD. One division rather than two, so the WAD rescale and the
+            // time normalisation truncate once between them instead of compounding.
+            // m <= 0.5e18 gives m*m <= 2.5e35, and WAD*dt <= 3.6e21 — neither overflows.
+            uint256 sample = (m * m) / (WAD * dt);
             return (LAMBDA * varianceRateWad + ONE_MINUS_LAMBDA * sample) / WAD;
         }
     }

@@ -21,7 +21,10 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          # Pinned deliberately. `stable` silently moved 1.7.1 -> 1.8.3, which changed what
+          # `gasleft()` reports inside the test harness and broke the gas benchmark. Bump this on
+          # purpose, and re-measure docs/ARCHITECTURE.md's gas table when you do.
+          version: v1.8.3
 
       - name: Check formatting
         run: forge fmt --check
@@ -50,7 +53,10 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          # Pinned deliberately. `stable` silently moved 1.7.1 -> 1.8.3, which changed what
+          # `gasleft()` reports inside the test harness and broke the gas benchmark. Bump this on
+          # purpose, and re-measure docs/ARCHITECTURE.md's gas table when you do.
+          version: v1.8.3
 
       - name: Deep test run
         run: FOUNDRY_PROFILE=deep forge test

@@ -146,8 +146,9 @@ contract KairosFactory {
 
     function setOwner(address newOwner) external onlyOwner {
         if (newOwner == address(0)) revert ZeroAddress();
-        emit OwnerChanged(owner, newOwner);
+        address previous = owner;
         owner = newOwner;
+        emit OwnerChanged(previous, newOwner);
     }
 
     function poolCount() external view returns (uint256) {
