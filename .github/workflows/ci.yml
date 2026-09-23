@@ -74,5 +74,7 @@ jobs:
           diff -u test/fixtures/MathFixtures.sol /tmp/MathFixtures.sol \
             || (echo "::error::MathFixtures.sol is stale; run 'make fixtures'" && exit 1)
 
+      # Writes to a scratch directory so the committed RESULTS.md — produced by a much longer
+      # run — is never overwritten by a short CI one.
       - name: Smoke-run the simulation
-        run: python3 sim/kairos_sim.py --blocks 3000 --no-plots
+        run: python3 sim/kairos_sim.py --blocks 3000 --no-plots --outdir "$RUNNER_TEMP/sim"
