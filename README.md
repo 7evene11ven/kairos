@@ -6,6 +6,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/7evene11ven/kairos/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/7evene11ven/kairos/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Solidity 0.8.28" src="https://img.shields.io/badge/solidity-0.8.28-1b1b1f">
   <img alt="Foundry" src="https://img.shields.io/badge/built%20with-foundry-2f6f4e">
   <img alt="98 tests" src="https://img.shields.io/badge/tests-98%20passing-2f6f4e">
@@ -94,7 +95,7 @@ static fees. Read [RESULTS.md](docs/RESULTS.md) before believing any of this.
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/kairos && cd kairos
+git clone --recursive https://github.com/7evene11ven/kairos && cd kairos
 forge install
 make test          # 98 tests across 9 suites
 make sim           # regenerate docs/RESULTS.md and the charts
